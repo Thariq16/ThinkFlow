@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/auth_provider.dart';
+import '../../widgets/responsive_layout.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -35,6 +36,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -46,8 +49,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppTheme.spacingXl),
-            child: Column(
+            padding: ResponsiveLayout.responsivePadding(context),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // ─── Logo & Branding ─────────────────────────────
@@ -116,7 +121,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // ─── Sign In Button ──────────────────────────────
                 SizedBox(
-                  width: 320,
+                  width: screenWidth < 400 ? double.infinity : 320,
                   height: 54,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _signInWithGoogle,
@@ -183,6 +188,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     .animate()
                     .fadeIn(delay: 900.ms, duration: 600.ms),
               ],
+            ),
             ),
           ),
         ),

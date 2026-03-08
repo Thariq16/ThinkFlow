@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/user_plan_provider.dart';
 import '../../../services/stripe_service.dart';
+import '../../widgets/responsive_layout.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -22,8 +23,9 @@ class SettingsScreen extends ConsumerWidget {
         ),
         title: const Text('Settings'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppTheme.spacingLg),
+      body: ResponsiveLayout(
+        child: ListView(
+          padding: const EdgeInsets.all(AppTheme.spacingLg),
         children: [
           // ─── Profile Section ───────────────────────────────────
           Container(
@@ -188,6 +190,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

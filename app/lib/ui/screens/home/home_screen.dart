@@ -10,6 +10,7 @@ import '../../../providers/projects_provider.dart';
 import '../../../providers/user_plan_provider.dart';
 import '../../widgets/voice_record_button.dart';
 import '../../widgets/plan_gate.dart';
+import '../../widgets/responsive_layout.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,7 +23,8 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
+        child: ResponsiveLayout(
+          child: CustomScrollView(
           slivers: [
             // ─── Header ──────────────────────────────────────────
             SliverToBoxAdapter(
@@ -226,6 +228,7 @@ class HomeScreen extends ConsumerWidget {
               child: SizedBox(height: 100),
             ),
           ],
+        ),
         ),
       ),
     );
