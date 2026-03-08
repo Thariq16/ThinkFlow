@@ -1,0 +1,215 @@
+PRODUCT BRIEF
+ThinkFlow
+Voice-first task intelligence for product thinkers
+Version
+0.2 — Updated
+Status
+Discovery
+Owner
+PM
+Date
+March 2026
+Frontend
+Flutter + Riverpod
+Backend
+Firebase + Cloud Functions
+AI
+Vertex AI + Gemini
+Auth / Billing
+Google Auth + Stripe
+1. Problem Statement
+Product managers operate in a state of constant cognitive overflow. Ideas, dependencies, blockers, and strategic threads arrive faster than any tool is designed to capture them.
+Core Pain Point
+Current tools require you to already think clearly before you can capture anything. But thinking and organizing are not the same activity — and forcing them to happen simultaneously kills both.
+Voice memos exist: but stay as raw audio — they never become actionable
+Task managers: Notion, Linear, Jira require structured input before you have structure
+AI tools: help you think, but don't feed into an organized task system
+Chain-of-thought: the nuance in your head rarely makes it into your workflow intact
+2. Product Vision
+ThinkFlow is a voice-first thinking companion that captures raw, unstructured thought and transforms it into an organized, hierarchical task system — enriched by your own knowledge base.
+Product Thesis
+The best PM tool doesn't ask you to think like a machine. It takes your messy, brilliant, half-formed thinking and structures it for you — then gets smarter the more context you give it.
+3. Target User
+Attribute
+Detail
+Primary user
+Solo Product Manager (v1 — personal use)
+Secondary users
+Founders, Consultants, UX Researchers
+Context of use
+On-the-go, commuting, between meetings, brainstorming
+Tech comfort
+High — already uses Notion, Linear, Jira, Slack
+Core frustration
+Thinking speed exceeds typing speed; tools demand structure upfront
+4. Core Features
+Feature
+Description
+Voice Capture
+Primary input — speak a stream of consciousness. No structure required.
+AI Decomposition
+Generates a Level 0 project container, core tasks, and sub-tasks automatically.
+Knowledge Base
+Upload PDFs, docs, URLs. AI recalibrates all incomplete tasks with new context.
+Editable Task Cards
+Every generated task is fully editable: title, description, priority, status, notes.
+Live Recalibration
+Only open tasks are re-evaluated when new KB items are added. Completed tasks are never modified.
+5. Task Hierarchy Model
+Level
+Description
+Level 0 — Project
+Auto-generated from voice input. Top-level container for the work.
+Level 1 — Epic
+Major workstreams or themes extracted from the voice input.
+Level 2 — Sub-Task
+Granular, actionable steps under each epic. AI-generated and fully editable.
+6. Technical Stack
+All technology decisions have been finalized for v1. The stack is deliberately cohesive — Flutter, Firebase, Google Auth, Vertex AI, and Gemini are all part of the Google ecosystem, which reduces integration complexity and consolidates billing on a single cloud account.
+Layer
+Technology + Rationale
+Client — Web (Phase 1)
+Flutter Web compiled as PWA. Ships instantly without app store. Same codebase as mobile.
+Client — Mobile (Phase 2)
+Flutter iOS + Android from the same codebase. No rewrite required.
+State Management
+Flutter Riverpod. Reactive, testable, and aligns well with Firestore real-time streams.
+Authentication
+Firebase Auth with Google Sign-In. Zero custom auth code required.
+Database
+Cloud Firestore. Real-time listeners drive live task card updates without polling.
+File Storage
+Firebase Storage. Stores voice audio files and uploaded KB documents.
+Backend Logic
+Firebase Cloud Functions (Node.js). All AI calls happen server-side — API keys never exposed to client.
+AI — Core Model
+Gemini 1.5 Pro via Vertex AI. Used for task decomposition and KB recalibration.
+AI — Fast Tasks
+Gemini 1.5 Flash via Vertex AI. Used for quick subtask generation and lightweight inference.
+AI — Transcription
+Gemini 1.5 Pro audio input (or Whisper API as fallback). Voice → text before decomposition.
+Billing
+Stripe. Subscription management with webhook-driven plan updates in Firestore.
+Hosting
+Firebase Hosting. CDN-backed PWA shell with automatic HTTPS.
+7. Vertex AI + Gemini Strategy
+Vertex AI in Firebase is the integration layer between Cloud Functions and the Gemini models. It handles authentication via Google Cloud service accounts, quota management, and billing — all through the same Google Cloud project as Firebase. No separate API key management is needed.
+Why Gemini over other LLM providers
+Architectural coherence: Firebase + Vertex AI + Gemini all run in the same Google Cloud project. One billing account, one IAM setup, one monitoring dashboard.
+Context window: Gemini 1.5 Pro supports a 1M token context window. For KB recalibration, large documents (PRDs, research reports) can be passed in full without chunking — significantly simplifying the recalibration pipeline.
+Native Firebase Extensions: Firestore-triggered Gemini calls available as Firebase Extensions for lightweight use cases, without writing a full Cloud Function.
+Flash model for cost control: Gemini 1.5 Flash is fast and inexpensive for subtask generation — preserving Pro model budget for complex decomposition and recalibration.
+Gemini Model Routing
+Task
+Model
+Reason
+Voice transcription
+Gemini 1.5 Pro (audio)
+Native multimodal — no separate Whisper call needed
+Task decomposition
+Gemini 1.5 Pro
+Complex structured JSON output; needs reliable reasoning
+KB recalibration
+Gemini 1.5 Pro
+Long context window handles large documents in one pass
+Subtask generation
+Gemini 1.5 Flash
+Fast, cheap; quality sufficient for granular sub-tasks
+Change summary generation
+Gemini 1.5 Flash
+Short output; speed and cost matter here
+Security Rule
+All Gemini API calls are made exclusively from Cloud Functions using Vertex AI service account credentials. The Flutter client never holds an API key. Plan-tier enforcement (Free vs Pro vs Team) is also checked inside Cloud Functions before any AI call is made.
+8. Riverpod State Management Architecture
+Flutter Riverpod is the state management layer for the entire client application. It is chosen for its testability, its natural alignment with Firestore's real-time stream model, and its ability to handle async state (Cloud Function calls) cleanly alongside live data streams.
+Provider Architecture
+Provider
+Type + Responsibility
+authStateProvider
+StreamProvider — wraps Firebase Auth stream. Drives app routing (logged in vs logged out).
+userPlanProvider
+StreamProvider — listens to Firestore users/{uid}.plan. Gates UI features by subscription tier.
+projectsProvider
+StreamProvider — real-time list of all projects for the current user from Firestore.
+activeProjectProvider
+StateProvider — holds the currently selected project ID. Drives task list view.
+tasksProvider
+StreamProvider.family(projectId) — real-time task tree for a given project. Rebuilt when project changes.
+taskEditNotifier
+StateNotifierProvider — holds local, unsaved edits to a task card before Firestore write.
+voiceRecordingProvider
+StateNotifierProvider — manages microphone state: idle / recording / processing / done.
+recalibrationProvider
+FutureProvider — triggers Cloud Function call; holds loading / result / error state for KB recalibration.
+kbItemsProvider
+StreamProvider.family(projectId) — real-time list of KB documents attached to a project.
+Optimistic UI Pattern
+When a user edits a task card, the UI must feel instant. The pattern is:
+Step 1: User edits task title or description in the card UI
+Step 2: taskEditNotifier updates local Riverpod state immediately — UI reflects change at once
+Step 3: On save (tap away or explicit save button), Firestore write is triggered in background
+Step 4: tasksProvider stream confirms the write — local state and remote state converge
+Step 5: If the Firestore write fails, taskEditNotifier rolls back and surfaces an error toast
+Why this matters
+Never wait for a Firestore write to update the UI. Users expect task editors to feel like a native app, not a web form. Optimistic updates with rollback on failure is the correct pattern here.
+Voice Recording State Machine
+The voiceRecordingProvider manages a simple state machine to keep recording logic clean and testable:
+idle  →  recording  →  processing  →  done  →  idle
+              ↘  error  ↗
+idle: Default state. Record button visible and enabled.
+recording: Microphone active. Audio being streamed or buffered. Stop button shown.
+processing: Audio sent to Cloud Function. Transcription + decomposition in progress. Loading indicator shown.
+done: Task tree returned and written to Firestore. tasksProvider stream updates the UI automatically.
+error: Cloud Function call failed. Error message surfaced. User can retry.
+9. Knowledge Base & Recalibration Logic
+Supported Input Types
+PDF documents: PRDs, specs, reports, research papers
+Plain text files: .txt, .md
+Web URLs: auto-fetched and text-extracted server-side
+Pasted text: inline notes or copied content
+Recalibration Rules
+Only incomplete tasks are sent to the LLM: tasks with status: done or lockedFromRecalib: true are excluded entirely
+User initiates recalibration manually: upload triggers a banner prompt — never auto-applies without user action
+Change summary is always shown: a diff view surfaces what changed and why before the user accepts
+User can lock any task: setting lockedFromRecalib: true pins a task permanently — AI will never modify it
+Design Principle
+Recalibration should feel like a smart colleague who just read your doc and says: 'Given this, here's what I think you should adjust.' Not a system overwrite. The user is always in control.
+10. SaaS Model
+Plan
+Limits + Price
+Free — $0/month
+3 projects, 5 voice inputs/month, no KB upload, web only
+Pro — $12/month
+Unlimited projects, unlimited voice, KB uploads up to 50MB, web + mobile, priority AI
+Team — $29/month
+Everything in Pro, 5 seats, shared projects, admin dashboard, SSO on roadmap
+Billing is managed entirely through Stripe. The Flutter client opens a Stripe-hosted Checkout page. On successful payment, Stripe fires a webhook to a Cloud Function, which updates the plan field in Firestore. The client reads the plan from Firestore — it never self-reports its own tier.
+11. Phased Roadmap
+Phase
+Scope
+Phase 1 — Core Loop (Month 1–3)
+Flutter Web PWA, Firebase Auth, voice → transcription → task decomposition, editable task cards, Firestore real-time sync, Free + Pro tiers via Stripe
+Phase 2 — Knowledge Base (Month 3–5)
+KB upload + text extraction, Vertex AI recalibration flow, diff / change summary UI, lockedFromRecalib flag, Gemini Flash for subtask generation
+Phase 3 — Mobile + Team (Month 5–8)
+Flutter iOS + Android, push notifications, Team plan + shared projects, integrations: Notion, Linear export
+12. Open Questions
+Recalibration UX: Should the change summary be a side panel diff view or an inline card overlay? Side panel feels right for desktop PWA; overlay may work better on mobile.
+Thinking mode: Should there be an optional follow-up mode where the AI asks clarifying questions before decomposing? Adds value but complicates the v1 flow — defer to Phase 2.
+Multi-project from day one: Yes — Firestore architecture supports it cheaply and it's a basic expectation for a PM tool.
+Whisper fallback: Gemini 1.5 Pro handles audio natively, but a Whisper API fallback should be available if transcription quality is poor in non-English or noisy environments.
+Offline support: Firestore has built-in offline persistence. Enable it from day one — task editing should work without a connection and sync on reconnect.
+13. Success Metrics
+Metric
+Target (90 days post-launch)
+Voice-to-project conversion
+> 80% of voice sessions result in a saved project
+Recalibration adoption
+> 40% of projects have at least one KB item attached
+Task edit rate
+< 30% of AI-generated tasks deleted outright (proxy for output quality)
+Week-2 retention
+> 50% of users return in week 2
+NPS
+> 40
+ThinkFlow — Product Brief v0.2 — Confidential — March 2026

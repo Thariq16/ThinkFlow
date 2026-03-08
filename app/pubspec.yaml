@@ -1,0 +1,52 @@
+name: thinkflow
+description: Voice-first task intelligence for product thinkers.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.0.0
+  cloud_firestore: ^5.0.0
+  firebase_storage: ^12.0.0
+  cloud_functions: ^5.0.0
+
+  # State Management
+  flutter_riverpod: ^2.5.0
+  riverpod_annotation: ^2.3.0
+
+  # Routing
+  go_router: ^14.0.0
+
+  # Audio recording
+  record: ^5.1.0
+  just_audio: ^0.9.0
+
+  # File handling
+  file_picker: ^8.0.0
+  http: ^1.2.0
+
+  # UI
+  google_fonts: ^6.2.0
+  flutter_animate: ^4.5.0
+
+  # Utilities
+  url_launcher: ^6.2.0
+  intl: ^0.19.0
+  uuid: ^4.3.0
+
+dev_dependencies:
+  riverpod_generator: ^2.4.0
+  build_runner: ^2.4.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

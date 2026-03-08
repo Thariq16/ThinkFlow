@@ -1,0 +1,56 @@
+# ─── IDE & OS ────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Node ────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Flutter / Dart ──────────────────────────────────────────────────
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.pub-cache/
+.pub/
+*.iml
+
+# ─── Firebase ────────────────────────────────────────────────────────
+.firebase/
+.firebaserc
+
+# ─── Cloud Functions compiled output ─────────────────────────────────
+functions/lib/
+functions/.env
+functions/.env.local
+
+# ─── Secrets — NEVER commit these ────────────────────────────────────
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+.env
+.env.*
+!.env.example
+
+# ─── Logs ────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubspec.lock
+
+# ─── Temp files ──────────────────────────────────────────────────────
+temp_*
+*.tmp
+
+# ─── Docs (binary docx) ─────────────────────────────────────────────
+docs/*.docx
